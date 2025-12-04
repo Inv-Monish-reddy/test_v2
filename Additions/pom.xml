@@ -14,6 +14,8 @@
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <junit.version>5.10.0</junit.version>
+        <sonar.host.url>http://localhost:9000</sonar.host.url>
+         <sonar.token>squ_5a297a89e5002857c79eb3c76e7a0af8d91cc82a</sonar.token>
     </properties>
 
     <dependencies>
