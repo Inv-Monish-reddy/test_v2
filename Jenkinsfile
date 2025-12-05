@@ -10,7 +10,6 @@ pipeline {
         SONAR_HOST_URL = "https://v2code.rtwohealthcare.com"
         SONAR_TOKEN = "sqp_c845971e99d79e08e5b3024752e6235cd4f41dec"
 
-        // Docker Registry (same host, no path)
         DOCKER_REGISTRY_URL = "v2deploy.rtwohealthcare.com"
         IMAGE_NAME = "test-v2"
         IMAGE_TAG = "v${BUILD_NUMBER}"
@@ -26,7 +25,10 @@ pipeline {
 
         stage('Maven Build + Tests') {
             steps {
-                sh "cd Additions && mvn -B clean verify"
+                sh """
+                    cd Additions
+                    mvn -B clean verify
+                """
             }
         }
 
@@ -34,11 +36,12 @@ pipeline {
             steps {
                 withSonarQubeEnv('SonarQube') {
                     sh """
+                        cd Additions
                         mvn sonar:sonar \
-                        -Dsonar.projectKey=test_v2 \
-                        -Dsonar.projectName=test_v2 \
-                        -Dsonar.host.url=${SONAR_HOST_URL} \
-                        -Dsonar.token=${SONAR_TOKEN}
+                            -Dsonar.projectKey=test_v2 \
+                            -Dsonar.projectName=test_v2 \
+                            -Dsonar.host.url=${SONAR_HOST_URL} \
+                            -Dsonar.token=${SONAR_TOKEN}
                     """
                 }
             }
@@ -55,6 +58,7 @@ pipeline {
         stage('Docker Build') {
             steps {
                 sh """
+                    cd Additions
                     docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
                     docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${DOCKER_REGISTRY_URL}/${IMAGE_NAME}:${IMAGE_TAG}
                     docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${DOCKER_REGISTRY_URL}/${IMAGE_NAME}:latest
@@ -69,7 +73,6 @@ pipeline {
                     usernameVariable: 'USER',
                     passwordVariable: 'PASS'
                 )]) {
-
                     sh """
                         echo "$PASS" | docker login ${DOCKER_REGISTRY_URL} -u "$USER" --password-stdin
 
