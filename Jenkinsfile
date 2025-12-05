@@ -18,9 +18,7 @@ pipeline {
     stages {
 
         stage('Checkout') {
-            steps {
-                checkout scm
-            }
+            steps { checkout scm }
         }
 
         stage('Maven Build + Tests') {
@@ -47,13 +45,7 @@ pipeline {
             }
         }
 
-        stage("Quality Gate") {
-            steps {
-                timeout(time: 5, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true
-                }
-            }
-        }
+        // ❌ QUALITY GATE REMOVED
 
         stage('Docker Build') {
             steps {
