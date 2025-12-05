@@ -14,7 +14,7 @@
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <junit.version>5.10.0</junit.version>
-        <sonar.host.url>https://v2code.rtwohealthcare.com/job/test_v2/</sonar.host.url>
+        <sonar.host.url>https://v2code.rtwohealthcare.com/</sonar.host.url>
          <sonar.token>sqp_c845971e99d79e08e5b3024752e6235cd4f41dec</sonar.token>
     </properties>
 
