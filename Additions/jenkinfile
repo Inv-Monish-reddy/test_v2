@@ -1,1 +1,17 @@
+pipeline {
+    agent any
+
+    parameters {
+        string(name: 'BRANCH', defaultValue: 'main', description: 'Branch to build')
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: params.BRANCH,
+                    url: 'https://github.com/your/repo.git'
+            }
+        }
+    }
+}
 
