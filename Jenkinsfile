@@ -11,6 +11,7 @@ pipeline {
         SONAR_TOKEN = "sqp_c845971e99d79e08e5b3024752e6235cd4f41dec"
 
         DOCKER_REGISTRY_URL = "v2deploy.rtwohealthcare.com"
+        REGISTRY_CREDENTIALS = 'docker-repo'
         IMAGE_NAME = "test-v2"
         IMAGE_TAG = "v${BUILD_NUMBER}"
     }
