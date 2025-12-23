@@ -10,10 +10,13 @@ pipeline {
         SONAR_HOST_URL = "https://v2code.rtwohealthcare.com"
         SONAR_TOKEN = "sqp_c845971e99d79e08e5b3024752e6235cd4f41dec"
 
+        // -------- DOCKER (FIXED) --------
         DOCKER_REGISTRY_URL = "v2deploy.rtwohealthcare.com"
-        REGISTRY_CREDENTIALS = 'docker-repo'
+        DOCKER_REPO = "test-v2"          // ← Nexus repo name
+        REGISTRY_CREDENTIALS = "docker-repo"   // ← existing Jenkins credential
+
         IMAGE_NAME = "test-v2"
-        IMAGE_TAG = "v${BUILD_NUMBER}"
+        IMAGE_TAG  = "v${BUILD_NUMBER}"
     }
 
     stages {
@@ -46,15 +49,21 @@ pipeline {
             }
         }
 
-        // ❌ QUALITY GATE REMOVED
+        // ❌ QUALITY GATE REMOVED (unchanged)
+
+        /* ------------ DOCKER FIXES START ------------ */
 
         stage('Docker Build') {
             steps {
                 sh """
                     cd Additions
                     docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
-                    docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${DOCKER_REGISTRY_URL}/${IMAGE_NAME}:${IMAGE_TAG}
-                    docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${DOCKER_REGISTRY_URL}/${IMAGE_NAME}:latest
+
+                    docker tag ${IMAGE_NAME}:${IMAGE_TAG} \
+                      ${DOCKER_REGISTRY_URL}/${DOCKER_REPO}/${IMAGE_NAME}:${IMAGE_TAG}
+
+                    docker tag ${IMAGE_NAME}:${IMAGE_TAG} \
+                      ${DOCKER_REGISTRY_URL}/${DOCKER_REPO}/${IMAGE_NAME}:latest
                 """
             }
         }
@@ -62,20 +71,23 @@ pipeline {
         stage('Docker Push') {
             steps {
                 withCredentials([usernamePassword(
-                    credentialsId: 'nexus-docker-cred',
-                    usernameVariable: 'USER',
-                    passwordVariable: 'PASS'
+                    credentialsId: "${REGISTRY_CREDENTIALS}",
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
                 )]) {
                     sh """
-                        echo "$PASS" | docker login ${DOCKER_REGISTRY_URL} -u "$USER" --password-stdin
+                        echo "$DOCKER_PASS" | docker login ${DOCKER_REGISTRY_URL} \
+                          -u "$DOCKER_USER" --password-stdin
 
-                        docker push ${DOCKER_REGISTRY_URL}/${IMAGE_NAME}:${IMAGE_TAG}
-                        docker push ${DOCKER_REGISTRY_URL}/${IMAGE_NAME}:latest
+                        docker push ${DOCKER_REGISTRY_URL}/${DOCKER_REPO}/${IMAGE_NAME}:${IMAGE_TAG}
+                        docker push ${DOCKER_REGISTRY_URL}/${DOCKER_REPO}/${IMAGE_NAME}:latest
 
                         docker logout ${DOCKER_REGISTRY_URL}
                     """
                 }
             }
         }
+
+        /* ------------ DOCKER FIXES END ------------ */
     }
 }
